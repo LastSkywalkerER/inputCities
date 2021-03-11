@@ -1,0 +1,32 @@
+{
+  "name": "gloJS2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.13.10",
+    "babel-loader": "^8.2.2",
+    "eslint": "^7.21.0",
+    "webpack": "^5.24.4",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.prod.config.js",
+    "dev": "concurrently --kill-others \"webpack serve --config webpack.dev.config.js\" \"json-server --watch db_cities.json\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LastSkywalkerER/gloJS2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LastSkywalkerER/gloJS2/issues"
+  },
+  "homepage": "https://github.com/LastSkywalkerER/gloJS2#readme"
+}
