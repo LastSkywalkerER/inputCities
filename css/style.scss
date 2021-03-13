@@ -235,3 +235,24 @@ $spinkit-spinner-color: #000000 !default;
     }
   }
   
+modal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: #0000007e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .popup {
+    width: 20%;
+    height: 20%;
+    background: #004ea7;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

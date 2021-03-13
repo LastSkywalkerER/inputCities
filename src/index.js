@@ -10,13 +10,18 @@ const selectCities = document.getElementById('select-cities'),
   button = document.querySelector('.button'),
   label = document.querySelector('label'),
   mainWindow = document.querySelector('.input-cities'),
-  urlData = 'http://localhost:3000/RU',
+  urlData = 'http://localhost:3000/',
   countryLineSelector = '.dropdown-lists__total-line',
   cityLineSelector = '.dropdown-lists__line',
   spiner = document.createElement('div'),
+  modal = document.querySelector('modal'),
   mainBlockWidth = mainWindow.clientWidth;
 let listState = '',
-  appData = [];
+  appData = localStorage.getItem('local') ? JSON.parse(localStorage.getItem('local')) : false,
+  local = 'RU',
+  notFoundText = '';
+
+
 
 // анимация загрузки данных
 const loadingPage = () => {
@@ -36,7 +41,7 @@ const loadedPgae = () => {
 };
 
 // зпрос на получение данных с сервера
-const getData = callback => fetch(urlData)
+const getData = callback => fetch(urlData + local)
   .then(request => request.json())
   .then(request => callback(request));
 
@@ -79,7 +84,6 @@ const renderDefaultList = () => {
       renderCity(insertPoint, country.cities[i]);
     }
   });
-  console.log(appData);
 
 };
 
@@ -112,7 +116,7 @@ const renderAutocompleteList = input => {
   });
   if (!insertPoint.textContent) {
     renderCity(insertPoint, {
-      name: 'Ничего не найдено',
+      name: notFoundText,
       count: ''
     });
   }
@@ -260,7 +264,12 @@ const listeners = () => {
       selectCities.value = clickText;
       button.removeAttribute('disabled', '');
       renderAutocompleteList(selectCities.value.trim());
-      showAutocomplete();
+      hideAll();
+    }
+    // переход по ссылке тоже всё чистит
+    if (event.target.closest('.' + button.classList[0])) {
+      selectCities.value = '';
+      hideAll();
     }
     // убираем бесящий лейбл если поле нее пустое при кликах
     if (selectCities.value) {
@@ -280,6 +289,7 @@ const listeners = () => {
 
   });
 
+  // обработка ввода города
   selectCities.addEventListener('input', () => {
     if (selectCities.value) {
       renderAutocompleteList(selectCities.value.trim());
@@ -296,18 +306,94 @@ const listeners = () => {
       label.style.display = 'block';
       closeButton.style.display = 'none';
     }
-
-
   });
+};
+
+// если данные подгрузились из локального хранилища, то грузим страницу. Если нет, то подгружаем данные с сервера на страницу и в локальное хранилище
+const saveData = () => {
+  if (appData) {
+    loadedPgae();
+    hideAll();
+    listeners();
+    renderDefaultList();
+  } else {
+    getData(request => {
+      request.map(country => bubleSort(country.cities, 'count'));
+      let mainCountry = '',
+        index = 1;
+      switch (local) {
+        case 'RU':
+          mainCountry = 'Россия';
+          break;
+        case 'EN':
+          mainCountry = 'United Kingdom';
+          break;
+        case 'DE':
+          mainCountry = 'Deutschland';
+          break;
+      }
+      appData = [];
+      request.forEach(country => {
+        if (country.country === mainCountry) {
+          appData[0] = country;
+        } else {
+          appData[index] = country;
+          index++;
+        }
+      });
+      localStorage.setItem('local', JSON.stringify(appData));
+      loadedPgae();
+      hideAll();
+      listeners();
+      renderDefaultList();
+    });
+  }
+};
+
+// переводим вёрску в выбранный язык
+const translatePage = () => {
+  let labelText = '',
+    buttonText = '';
+  switch (local) {
+    case 'RU':
+      notFoundText = 'Ничего не найдено';
+      labelText = 'Страна или город';
+      buttonText = 'Перейти';
+      break;
+    case 'EN':
+      notFoundText = 'Nothing found';
+      labelText = 'Country or city';
+      buttonText = 'Go over';
+      break;
+    case 'DE':
+      notFoundText = 'Niets gevonden';
+      labelText = 'Land of stad';
+      buttonText = 'Ga over';
+      break;
+  }
+  label.textContent = labelText;
+  button.textContent = buttonText;
+};
+
+// проверяем установлена ли локализация сайта в куки, если да, то просто грузим страницу без модалки, иначе узнаю и пишем в куки
+const checkLocal = () => {
+  if (document.cookie) {
+    modal.style.display = 'none';
+    local = document.cookie;
+    saveData();
+    translatePage();
+  } else {
+    modal.addEventListener('input', event => {
+      local = event.target.value;
+      document.cookie = local;
+      modal.style.display = 'none';
+      appData = false;
+      saveData();
+      translatePage();
+    });
+  }
 };
 
 // грузим данные и по загрузке рисуем элементы
 loadingPage();
-getData(request => {
-  request.map(country => bubleSort(country.cities, 'count'));
-  appData = request;
-  loadedPgae();
-  hideAll();
-  listeners();
-  renderDefaultList();
-});
+checkLocal();
