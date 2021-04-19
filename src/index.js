@@ -10,7 +10,7 @@ const selectCities = document.getElementById('select-cities'),
   button = document.querySelector('.button'),
   label = document.querySelector('label'),
   mainWindow = document.querySelector('.input-cities'),
-  urlData = 'http://localhost:3000/',
+  urlData = './db_cities.json',
   countryLineSelector = '.dropdown-lists__total-line',
   cityLineSelector = '.dropdown-lists__line',
   spiner = document.createElement('div'),
@@ -41,9 +41,9 @@ const loadedPgae = () => {
 };
 
 // зпрос на получение данных с сервера
-const getData = callback => fetch(urlData + local)
+const getData = callback => fetch(urlData)
   .then(request => request.json())
-  .then(request => callback(request));
+  .then(request => callback(request[local]));
 
 // создание контейнера для страны с городами и отрисовка строки с этой страной
 const renderCounry = (listForInsert, country) => {
